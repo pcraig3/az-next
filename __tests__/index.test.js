@@ -5,10 +5,14 @@ import { render } from 'react-testing-library'
 
 import App from '../pages/index.js'
 
-describe('With React Testing Library', () => {
-  it('Shows "Hello World!"', () => {
-    const { getByText } = render(<App />)
+describe('Index page', () => {
+  const { getByText } = render(<App />)
 
-    expect(getByText('Hello World!')).not.toBeNull()
+  it('shows "Page One"', () => {
+    expect(getByText('Page One')).not.toBeNull()
+  })
+
+  it('links to "Page Two"', () => {
+    expect(getByText('Page Two', { selector: 'a' })).not.toBeNull()
   })
 })
