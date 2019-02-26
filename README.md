@@ -4,47 +4,47 @@ This is a tiny proof-of-concept app to trial Azure container deployments.
 
 ## Getting started
 
-### [Install `yarn`](https://yarnpkg.com/en/)
+### [Install `npm`](https://www.npmjs.com/get-npm)
 
-`yarn` is a javascript package manager. It downloads project dependencies and runs node applications.
+`npm` is a javascript package manager. It downloads project dependencies and runs node applications.
 
 ### [Install `docker`](https://docs.docker.com/install/)
 
 A docker container allows a developer to package up an application and all of its parts. This means we can build an app in any language, in any stack, and then run it anywhere — whether locally or on a server.
 
-## Build and run with yarn
+## Build and run with npm
 
 ```bash
 # install dependencies
-yarn
+npm install
 
 # run application in 'dev' mode
-yarn dev
+npm run dev
 
 # run application in 'prod' mode
-yarn build && yarn start
+npm run build && npm start
 ```
 
 On a Mac, press `Control` + `C` to quit the running application.
 
-### Run tests with yarn
+### Run tests with npm
 
 ```bash
 # run unit tests
-yarn test
+npm run test
 
 # run code linter
-yarn lint
+npm run lint
 ```
 
 ## Build and run as a Docker container
 
 ```bash
 # build an image locally
-docker build -t az-next .
+docker build -t cdssnc/az-next .
 
 # run the container
-docker run -it -p 3000:3000 az-next
+docker run -it -p 3000:3000 cdssnc/az-next
 ```
 
 On a Mac, press `Control` + `C` to quit the running docker container.
