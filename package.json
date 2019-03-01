@@ -18,9 +18,9 @@
   },
   "scripts": {
     "build": "next build",
-    "dev": "next",
+    "dev": "next -p 80",
     "lint": "node_modules/eslint/bin/eslint.js pages __tests__",
-    "start": "next start",
+    "start": "next start -p 80",
     "test": "jest"
   }
 }
