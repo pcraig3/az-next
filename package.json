@@ -2,6 +2,10 @@
   "name": "az-next",
   "version": "1.0.0",
   "license": "MIT",
+  "repository": {
+  "type" : "git",
+  "url" : "https://github.com/cds-snc/az-next"
+  },
   "dependencies": {
     "next": "^8.0.3",
     "react": "^16.8.3",
