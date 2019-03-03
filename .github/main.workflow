@@ -1,6 +1,6 @@
 workflow "Build, test, and deploy on push" {
   on = "push"
-  resolves = ["Push container to DockerHub"]
+  resolves = ["If personal branch"]
 }
 
 action "Install npm dependencies" {
@@ -20,26 +20,8 @@ action "Run Jest unit tests" {
   needs = ["Run JS linter"]
 }
 
-action "If master branch" {
+action "If personal branch" {
   uses = "actions/bin/filter@24a566c2524e05ebedadef0a285f72dc9b631411"
   needs = ["Run Jest unit tests"]
-  args = "branch master"
-}
-
-action "Sign into Dockerhub" {
-  uses = "actions/docker/login@8cdf801b322af5f369e00d85e9cf3a7122f49108"
-  secrets = ["DOCKER_USERNAME", "DOCKER_PASSWORD"]
-  needs = ["If master branch"]
-}
-
-action "Build a Docker container" {
-  uses = "actions/docker/cli@8cdf801b322af5f369e00d85e9cf3a7122f49108"
-  needs = ["Sign into Dockerhub"]
-  args = "build -t cdssnc/az-next ."
-}
-
-action "Push container to DockerHub" {
-  uses = "actions/docker/cli@8cdf801b322af5f369e00d85e9cf3a7122f49108"
-  needs = ["Build a Docker container"]
-  args = "push cdssnc/az-next"
+  args = "branch personal"
 }
