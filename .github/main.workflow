@@ -1,6 +1,6 @@
 workflow "Build, test, and deploy on push" {
   on = "push"
-  resolves = ["Deploy as Azure Container Instance"]
+  resolves = ["Deploy from DockerHub to Azure Container Instance"]
 }
 
 action "Install npm dependencies" {
@@ -26,35 +26,34 @@ action "If personal branch" {
   args = "branch personal"
 }
 
+action "Login into Docker Hub" {
+  uses = "actions/docker/login@8cdf801b322af5f369e00d85e9cf3a7122f49108"
+  secrets = ["DOCKER_USERNAME", "DOCKER_PASSWORD"]
+  needs = ["If personal branch"]
+}
+
+action "Build a Docker container" {
+  uses = "actions/docker/cli@8cdf801b322af5f369e00d85e9cf3a7122f49108"
+  needs = ["Login into Docker Hub"]
+  args = "build -t cdssnc/az-next ."
+}
+
+action "Push container to Docker Hub" {
+  uses = "actions/docker/cli@8cdf801b322af5f369e00d85e9cf3a7122f49108"
+  needs = ["Build a Docker container"]
+  args = "push cdssnc/az-next"
+}
+
 action "Login to Azure" {
   uses = "Azure/github-actions/login@d0e5a0afc6b9d8d19c9ade8e2446ef3c20e260d4"
-  needs = ["If personal branch"]
+  needs = ["Push container to Docker Hub"]
   secrets = ["AZURE_SERVICE_APP_ID", "AZURE_SERVICE_PASSWORD", "AZURE_SERVICE_TENANT"]
 }
 
-action "Login to Azure Container Registry" {
-  uses = "actions/docker/login@8cdf801b322af5f369e00d85e9cf3a7122f49108"
-  secrets = ["DOCKER_USERNAME", "DOCKER_PASSWORD", "DOCKER_REGISTRY_URL"]
+action "Deploy from DockerHub to Azure Container Instance" {
+  uses = "Azure/github-actions/cli@d0e5a0afc6b9d8d19c9ade8e2446ef3c20e260d4"
   needs = ["Login to Azure"]
-}
-
-action "Build container locally" {
-  uses = "actions/docker/cli@8cdf801b322af5f369e00d85e9cf3a7122f49108"
-  needs = ["Login to Azure Container Registry"]
-  args = "build -t aznext.azurecr.io/az-next ."
-}
-
-action "Push container to Azure Container Registry" {
-  uses = "actions/docker/cli@8cdf801b322af5f369e00d85e9cf3a7122f49108"
-  needs = ["Build container locally"]
-  args = "push aznext.azurecr.io/az-next"
-}
-
-action "Deploy as Azure Container Instance" {
-  uses = "pcraig3/github-actions/cli@master"
-  needs = ["Push container to Azure Container Registry"]
-  secrets = ["AZURE_SERVICE_APP_ID", "AZURE_SERVICE_PASSWORD"]
   env = {
-    ACR_LOGIN_SERVER = "aznext.azurecr.io"
+    AZURE_SCRIPT = "az container create --resource-group az-next-rg --name az-next --image cdssnc/az-next --dns-name-label az-next-demo"
   }
 }
