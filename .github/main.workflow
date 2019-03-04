@@ -1,6 +1,6 @@
 workflow "Build, test, and deploy on push" {
   on = "push"
-  resolves = ["Push container to DockerHub"]
+  resolves = ["Deploy from DockerHub to Azure Container Instance"]
 }
 
 action "Install npm dependencies" {
@@ -26,7 +26,7 @@ action "If master branch" {
   args = "branch master"
 }
 
-action "Sign into Dockerhub" {
+action "Login into Docker Hub" {
   uses = "actions/docker/login@8cdf801b322af5f369e00d85e9cf3a7122f49108"
   secrets = ["DOCKER_USERNAME", "DOCKER_PASSWORD"]
   needs = ["If master branch"]
@@ -34,12 +34,34 @@ action "Sign into Dockerhub" {
 
 action "Build a Docker container" {
   uses = "actions/docker/cli@8cdf801b322af5f369e00d85e9cf3a7122f49108"
-  needs = ["Sign into Dockerhub"]
+  needs = ["Login into Docker Hub"]
   args = "build -t cdssnc/az-next ."
 }
 
-action "Push container to DockerHub" {
+action "Push container to Docker Hub" {
   uses = "actions/docker/cli@8cdf801b322af5f369e00d85e9cf3a7122f49108"
   needs = ["Build a Docker container"]
   args = "push cdssnc/az-next"
+}
+
+action "Login to Azure" {
+  uses = "Azure/github-actions/login@d0e5a0afc6b9d8d19c9ade8e2446ef3c20e260d4"
+  needs = ["Push container to Docker Hub"]
+  secrets = ["AZURE_SERVICE_APP_ID", "AZURE_SERVICE_PASSWORD", "AZURE_SERVICE_TENANT"]
+}
+
+action "Delete previous container" {
+  uses = "Azure/github-actions/cli@d0e5a0afc6b9d8d19c9ade8e2446ef3c20e260d4"
+  needs = ["Login to Azure"]
+  env = {
+    AZURE_SCRIPT = "az container delete --resource-group az-next-rg --name az-next --yes"
+  }
+}
+
+action "Deploy from DockerHub to Azure Container Instance" {
+  uses = "Azure/github-actions/cli@d0e5a0afc6b9d8d19c9ade8e2446ef3c20e260d4"
+  needs = ["Delete previous container"]
+  env = {
+    AZURE_SCRIPT = "az container create --resource-group az-next-rg --name az-next --image cdssnc/az-next --dns-name-label az-next-demo"
+  }
 }
