@@ -13,5 +13,12 @@ variables:
   imageName: 'cdssnc/az-next:$(build.buildId)'
 
 steps:
-- script: docker build -f Dockerfile -t $(imageName) .
-  displayName: 'docker build'
+- script: |
+    npm install
+    npm test
+    npm run lint 
+    docker build -f Dockerfile -t $(dockerId).azurecr.io/$(imageName) .
+    docker login -u $(dockerId) -p $pswd $(dockerId).azurecr.io
+    docker push $(dockerId).azurecr.io/$(imageName)
+  env:
+    pswd: $(dockerPassword)
