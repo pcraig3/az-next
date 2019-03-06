@@ -21,7 +21,7 @@ spec:
         app: az-next
     spec:
       containers:
-        - image: cdssnc/az-next
+        - image: aznextdevops.azurecr.io/pcraig3/az-next
           imagePullPolicy: Always
           name: az-next
           env:
